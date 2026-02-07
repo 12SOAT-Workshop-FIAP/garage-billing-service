@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: billing-service
+  labels:
+    app: billing-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: billing-service
+  template:
+    metadata:
+      labels:
+        app: billing-service
+    spec:
+      containers:
+      - name: billing-service
+        image: garage-billing-service:latest
+        ports:
+        - containerPort: 3002
+        env:
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: billing-service-secrets
+              key: mongodb-uri
+        - name: RABBITMQ_URL
+          valueFrom:
+            secretKeyRef:
+              name: billing-service-secrets
+              key: rabbitmq-url
+        - name: MERCADOPAGO_ACCESS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: billing-service-secrets
+              key: mercadopago-access-token
+        - name: MERCADOPAGO_PUBLIC_KEY
+          valueFrom:
+            secretKeyRef:
+              name: billing-service-secrets
+              key: mercadopago-public-key
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3002
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3002
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: billing-service
+spec:
+  selector:
+    app: billing-service
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3002
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: billing-service-secrets
+type: Opaque
+stringData:
+  mongodb-uri: mongodb://mongodb:27017/billing_service
+  rabbitmq-url: amqp://rabbitmq:5672
+  mercadopago-access-token: your_token_here
+  mercadopago-public-key: your_public_key_here
