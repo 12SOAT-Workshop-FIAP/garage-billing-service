@@ -1,0 +1,198 @@
+{
+  "info": {
+    "name": "Billing Service API",
+    "description": "Collection for Billing Service endpoints - Quotes, Payments, Parts, Service Catalog",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{jwt_token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Quotes",
+      "item": [
+        {
+          "name": "Create Quote",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workOrderId\": \"wo-uuid\",\n  \"customerId\": \"c-uuid\",\n  \"items\": [\n    {\n      \"name\": \"Synthetic Oil\",\n      \"description\": \"5W30 Full Synthetic\",\n      \"quantity\": 4,\n      \"unitPrice\": 45.99\n    },\n    {\n      \"name\": \"Oil Filter\",\n      \"description\": \"Original manufacturer\",\n      \"quantity\": 1,\n      \"unitPrice\": 35.00\n    }\n  ]\n}"
+            },
+            "url": { "raw": "{{base_url}}/quotes", "host": ["{{base_url}}"], "path": ["quotes"] }
+          }
+        },
+        {
+          "name": "Get All Quotes",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/quotes", "host": ["{{base_url}}"], "path": ["quotes"] } }
+        },
+        {
+          "name": "Get Quote by ID",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/quotes/{{quote_id}}", "host": ["{{base_url}}"], "path": ["quotes", "{{quote_id}}"] } }
+        },
+        {
+          "name": "Get Quotes by Work Order",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/quotes/work-order/{{work_order_id}}", "host": ["{{base_url}}"], "path": ["quotes", "work-order", "{{work_order_id}}"] } }
+        },
+        {
+          "name": "Approve Quote",
+          "request": { "method": "PATCH", "url": { "raw": "{{base_url}}/quotes/{{quote_id}}/approve", "host": ["{{base_url}}"], "path": ["quotes", "{{quote_id}}", "approve"] } }
+        },
+        {
+          "name": "Reject Quote",
+          "request": { "method": "PATCH", "url": { "raw": "{{base_url}}/quotes/{{quote_id}}/reject", "host": ["{{base_url}}"], "path": ["quotes", "{{quote_id}}", "reject"] } }
+        },
+        {
+          "name": "Send Quote",
+          "request": { "method": "PATCH", "url": { "raw": "{{base_url}}/quotes/{{quote_id}}/send", "host": ["{{base_url}}"], "path": ["quotes", "{{quote_id}}", "send"] } }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quoteId\": \"q-uuid\",\n  \"workOrderId\": \"wo-uuid\",\n  \"customerId\": \"c-uuid\",\n  \"amount\": 218.96,\n  \"paymentMethod\": \"PIX\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/payments", "host": ["{{base_url}}"], "path": ["payments"] }
+          }
+        },
+        {
+          "name": "Process Payment (Mercado Pago)",
+          "request": { "method": "POST", "url": { "raw": "{{base_url}}/payments/{{payment_id}}/process", "host": ["{{base_url}}"], "path": ["payments", "{{payment_id}}", "process"] } }
+        },
+        {
+          "name": "Get All Payments",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/payments", "host": ["{{base_url}}"], "path": ["payments"] } }
+        },
+        {
+          "name": "Get Payment by ID",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/payments/{{payment_id}}", "host": ["{{base_url}}"], "path": ["payments", "{{payment_id}}"] } }
+        },
+        {
+          "name": "Get Payments by Work Order",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/payments/work-order/{{work_order_id}}", "host": ["{{base_url}}"], "path": ["payments", "work-order", "{{work_order_id}}"] } }
+        },
+        {
+          "name": "Verify Payment Status",
+          "request": { "method": "PATCH", "url": { "raw": "{{base_url}}/payments/{{payment_id}}/verify", "host": ["{{base_url}}"], "path": ["payments", "{{payment_id}}", "verify"] } }
+        }
+      ]
+    },
+    {
+      "name": "Parts Catalog",
+      "item": [
+        {
+          "name": "Create Part",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Oil Filter\",\n  \"partNumber\": \"FLT-001\",\n  \"price\": 35.00,\n  \"costPrice\": 20.00,\n  \"stockQuantity\": 100,\n  \"minStockLevel\": 10\n}"
+            },
+            "url": { "raw": "{{base_url}}/parts", "host": ["{{base_url}}"], "path": ["parts"] }
+          }
+        },
+        {
+          "name": "Get All Parts",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/parts", "host": ["{{base_url}}"], "path": ["parts"] } }
+        },
+        {
+          "name": "Get Low Stock Parts",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/parts/low-stock", "host": ["{{base_url}}"], "path": ["parts", "low-stock"] } }
+        },
+        {
+          "name": "Get Part by ID",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/parts/{{part_id}}", "host": ["{{base_url}}"], "path": ["parts", "{{part_id}}"] } }
+        },
+        {
+          "name": "Update Part",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"price\": 40.00\n}" },
+            "url": { "raw": "{{base_url}}/parts/{{part_id}}", "host": ["{{base_url}}"], "path": ["parts", "{{part_id}}"] }
+          }
+        },
+        {
+          "name": "Update Stock",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"quantity\": 50\n}" },
+            "url": { "raw": "{{base_url}}/parts/{{part_id}}/stock", "host": ["{{base_url}}"], "path": ["parts", "{{part_id}}", "stock"] }
+          }
+        },
+        {
+          "name": "Delete Part",
+          "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/parts/{{part_id}}", "host": ["{{base_url}}"], "path": ["parts", "{{part_id}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "Service Catalog",
+      "item": [
+        {
+          "name": "Create Service",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Oil Change\",\n  \"description\": \"Complete synthetic oil change\",\n  \"price\": 80.00,\n  \"duration\": 60\n}"
+            },
+            "url": { "raw": "{{base_url}}/services", "host": ["{{base_url}}"], "path": ["services"] }
+          }
+        },
+        {
+          "name": "Get All Services",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/services", "host": ["{{base_url}}"], "path": ["services"] } }
+        },
+        {
+          "name": "Get Service by ID",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/services/{{service_id}}", "host": ["{{base_url}}"], "path": ["services", "{{service_id}}"] } }
+        },
+        {
+          "name": "Update Service",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"price\": 90.00\n}" },
+            "url": { "raw": "{{base_url}}/services/{{service_id}}", "host": ["{{base_url}}"], "path": ["services", "{{service_id}}"] }
+          }
+        },
+        {
+          "name": "Delete Service",
+          "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/services/{{service_id}}", "host": ["{{base_url}}"], "path": ["services", "{{service_id}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check (No Auth)",
+          "request": { "method": "GET", "auth": { "type": "noauth" }, "url": { "raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"] } }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3002", "type": "string" },
+    { "key": "jwt_token", "value": "", "type": "string" },
+    { "key": "quote_id", "value": "", "type": "string" },
+    { "key": "payment_id", "value": "", "type": "string" },
+    { "key": "work_order_id", "value": "", "type": "string" },
+    { "key": "part_id", "value": "", "type": "string" },
+    { "key": "service_id", "value": "", "type": "string" }
+  ]
+}
