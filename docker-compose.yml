@@ -12,22 +12,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
-  rabbitmq:
-    image: rabbitmq:3.12-management-alpine
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    networks:
+      - garage-network
 
   billing-service:
     build:
@@ -46,9 +32,12 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+    networks:
+      - garage-network
 
 volumes:
   mongodb-data:
-  rabbitmq-data:
+
+networks:
+  garage-network:
+    external: true
