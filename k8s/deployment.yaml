@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: billing-service
-        image: garage-billing-service:latest
+        image: <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/garage-billing-service:latest
         ports:
         - containerPort: 3002
         env:
@@ -79,7 +79,7 @@ metadata:
   name: billing-service-secrets
 type: Opaque
 stringData:
-  mongodb-uri: mongodb://mongodb:27017/billing_service
-  rabbitmq-url: amqp://rabbitmq:5672
+  mongodb-uri: mongodb://mongodb-billing-service:27017/billing_service
+  rabbitmq-url: amqp://rabbitmq-billing-service:5672
   mercadopago-access-token: your_token_here
   mercadopago-public-key: your_public_key_here

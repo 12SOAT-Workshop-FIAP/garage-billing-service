@@ -62,8 +62,8 @@ Architecture documentation: see `docs/` in `garage-os-service`.
 ## Quick Start
 
 ```bash
-# 1. Start garage-os-service FIRST (creates garage-network + shared RabbitMQ)
-cd ../garage-os-service
+# 1. Start local infrastructure (MongoDB + dedicated RabbitMQ for Billing)
+cd ../garage-billing-service
 docker compose up -d
 
 # 2. Clone and install
@@ -71,8 +71,8 @@ git clone <repo-url>
 cd garage-billing-service
 npm install
 
-# 3. Start infrastructure (MongoDB only -- RabbitMQ is shared from OS Service)
-docker compose up -d mongodb
+# 3. Start service (starts Billing service and its infrastructure)
+docker compose up -d
 
 # 4. Configure environment
 cp .env.example .env
@@ -88,9 +88,7 @@ npm run start:dev
 docker compose up -d
 ```
 
-This starts MongoDB and the service. Connects to the shared RabbitMQ via `garage-network`.
-
-> **Requires `garage-os-service` running first** -- this service joins the `garage-network` (external) to access the shared RabbitMQ instance.
+This starts MongoDB, RabbitMQ (dedicated to Billing) and the Billing service.
 
 ## API
 
