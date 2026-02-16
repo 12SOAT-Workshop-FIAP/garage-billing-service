@@ -109,10 +109,17 @@ jobs:
     
     - name: Deploy infrastructure
       run: |
-        kubectl apply -f k8s/mongodb-billing-deployment.yaml -n garage-production
-        kubectl apply -f k8s/rabbitmq-billing-deployment.yaml -n garage-production
-        kubectl wait --for=condition=ready pod -l app=mongodb-billing-service -n garage-production --timeout=300s
-        kubectl wait --for=condition=ready pod -l app=rabbitmq-billing-service -n garage-production --timeout=300s
+        kubectl apply -f k8s/mongodb-billing-deployment.yaml -n fiap-garage
+        kubectl wait --for=condition=ready pod -l app=mongodb-billing-service -n fiap-garage --timeout=300s
+    
+    - name: Create/Update Kubernetes Secrets
+      run: |
+        kubectl delete secret billing-service-secrets -n fiap-garage --ignore-not-found
+        kubectl create secret generic billing-service-secrets -n fiap-garage \
+          --from-literal=mongodb-uri=${{ secrets.MONGODB_URI }} \
+          --from-literal=rabbitmq-url=${{ secrets.RABBITMQ_URL }} \
+          --from-literal=mercadopago-access-token=${{ secrets.MERCADOPAGO_ACCESS_TOKEN }} \
+          --from-literal=mercadopago-public-key=${{ secrets.MERCADOPAGO_PUBLIC_KEY }}
     
     - name: Update deployment with AWS Account ID
       run: |
@@ -122,5 +129,5 @@ jobs:
     
     - name: Deploy application
       run: |
-        kubectl apply -f k8s/deployment.yaml -n garage-production
-        kubectl rollout status deployment/billing-service -n garage-production --timeout=5m
+        kubectl apply -f k8s/deployment.yaml -n fiap-garage
+        kubectl rollout status deployment/billing-service -n fiap-garage --timeout=5m

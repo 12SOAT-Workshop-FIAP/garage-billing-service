@@ -9,11 +9,13 @@ import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
 import { MessagingModule } from './messaging/messaging.module';
 import { HealthController } from './health/health.controller';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { Quote, QuoteSchema } from './quote/schemas/quote.schema';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/billing_service'),
+    MongooseModule.forFeature([{ name: Quote.name, schema: QuoteSchema }]),
     QuoteModule,
     PaymentModule,
     PartModule,
