@@ -72,14 +72,4 @@ spec:
     port: 80
     targetPort: 3002
   type: ClusterIP
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: billing-service-secrets
-type: Opaque
-stringData:
-  mongodb-uri: mongodb://mongodb-billing-service:27017/billing_service
-  rabbitmq-url: amqp://rabbitmq-billing-service:5672
-  mercadopago-access-token: your_token_here
-  mercadopago-public-key: your_public_key_here
+
