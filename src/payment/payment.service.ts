@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Payment, PaymentStatus } from './schemas/payment.schema';
@@ -11,7 +11,7 @@ export class PaymentService {
   constructor(
     @InjectModel(Payment.name) private paymentModel: Model<Payment>,
     private mercadoPagoService: MercadoPagoService,
-    private messagingService: MessagingService,
+    @Inject(forwardRef(() => MessagingService)) private messagingService: MessagingService,
   ) {}
 
   async create(createDto: CreatePaymentDto): Promise<Payment> {
