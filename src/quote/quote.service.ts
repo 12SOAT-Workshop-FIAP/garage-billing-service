@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Quote, QuoteStatus } from './schemas/quote.schema';
@@ -9,7 +9,7 @@ import { MessagingService } from '../messaging/messaging.service';
 export class QuoteService {
   constructor(
     @InjectModel(Quote.name) private quoteModel: Model<Quote>,
-    private messagingService: MessagingService,
+    @Inject(forwardRef(() => MessagingService)) private messagingService: MessagingService,
   ) {}
 
   async create(createDto: CreateQuoteDto): Promise<Quote> {
