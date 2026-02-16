@@ -1,15 +1,33 @@
 services:
-  mongodb:
+  mongodb-billing-service:
     image: mongo:7
     environment:
       MONGO_INITDB_DATABASE: billing_service
     ports:
       - "27017:27017"
     volumes:
-      - mongodb-data:/data/db
+      - mongodb-billing-data:/data/db
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - garage-network
+
+  rabbitmq-billing-service:
+    image: rabbitmq:3.12-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5674:5672"
+      - "15674:15672"
+    volumes:
+      - rabbitmq-billing-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
       timeout: 5s
       retries: 5
     networks:
@@ -21,8 +39,8 @@ services:
       dockerfile: Dockerfile
     environment:
       PORT: 3002
-      MONGODB_URI: mongodb://mongodb:27017/billing_service
-      RABBITMQ_URL: amqp://rabbitmq:5672
+      MONGODB_URI: mongodb://mongodb-billing-service:27017/billing_service
+      RABBITMQ_URL: amqp://rabbitmq-billing-service:5672
       MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN:-test_token}
       MERCADOPAGO_PUBLIC_KEY: ${MERCADOPAGO_PUBLIC_KEY:-test_key}
       JWT_SECRET: ${JWT_SECRET:-default-dev-secret}
@@ -30,13 +48,16 @@ services:
     ports:
       - "3002:3002"
     depends_on:
-      mongodb:
+      mongodb-billing-service:
+        condition: service_healthy
+      rabbitmq-billing-service:
         condition: service_healthy
     networks:
       - garage-network
 
 volumes:
-  mongodb-data:
+  mongodb-billing-data:
+  rabbitmq-billing-data:
 
 networks:
   garage-network:
