@@ -8,6 +8,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.enableCors();
+  app.setGlobalPrefix('billing');
 
   const config = new DocumentBuilder()
     .setTitle('Billing Service API')
