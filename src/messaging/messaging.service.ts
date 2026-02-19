@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit, Logger, Inject, forwardRef } from '@nestjs/common';
 import * as amqp from 'amqplib';
 import { QuoteService } from '../quote/quote.service';
+import { PaymentMethod } from '../payment/schemas/payment.schema';
 import { PaymentService } from '../payment/payment.service';
 
 @Injectable()
@@ -110,7 +111,10 @@ export class MessagingService implements OnModuleInit {
         });
         this.logger.log(`Quote created for work order ${data.workOrderId}`);
       } catch (error) {
-        this.logger.error(`Failed to create quote for work order ${data.workOrderId}:`, error.message);
+        this.logger.error(
+          `Failed to create quote for work order ${data.workOrderId}:`,
+          error.message,
+        );
       }
     });
 
@@ -122,7 +126,9 @@ export class MessagingService implements OnModuleInit {
         for (const quote of quotes) {
           if (quote.status === 'PENDING' || quote.status === 'SENT') {
             await this.quoteService.reject(quote._id.toString());
-            this.logger.log(`Rejected quote ${quote._id} for cancelled work order ${data.workOrderId}`);
+            this.logger.log(
+              `Rejected quote ${quote._id} for cancelled work order ${data.workOrderId}`,
+            );
           }
         }
 
@@ -139,7 +145,10 @@ export class MessagingService implements OnModuleInit {
           }
         }
       } catch (error) {
-        this.logger.error(`Failed saga compensation for work order ${data.workOrderId}:`, error.message);
+        this.logger.error(
+          `Failed saga compensation for work order ${data.workOrderId}:`,
+          error.message,
+        );
       }
     });
 
@@ -151,7 +160,9 @@ export class MessagingService implements OnModuleInit {
         const approvedPayments = payments.filter((p) => p.status === 'APPROVED');
 
         for (const payment of approvedPayments) {
-          this.logger.log(`Processing refund for payment ${payment._id}, work order ${data.workOrderId}`);
+          this.logger.log(
+            `Processing refund for payment ${payment._id}, work order ${data.workOrderId}`,
+          );
           await this.publish('payment.refund-requested', {
             paymentId: payment._id.toString(),
             workOrderId: data.workOrderId,
@@ -161,7 +172,47 @@ export class MessagingService implements OnModuleInit {
           });
         }
       } catch (error) {
-        this.logger.error(`Failed to process refund for work order ${data.workOrderId}:`, error.message);
+        this.logger.error(
+          `Failed to process refund for work order ${data.workOrderId}:`,
+          error.message,
+        );
+      }
+    });
+
+    // Aprovação da OS → Criar Pagamento
+    await this.subscribe('billing-work-order-approved', 'work-order.approved', async (data) => {
+      this.logger.log(`Work order approved - creating payment: ${data.workOrderId}`);
+      try {
+        // Encontrar o orçamento associado
+        const quotes = await this.quoteService.findByWorkOrder(data.workOrderId);
+        if (!quotes || quotes.length === 0) {
+          this.logger.warn(`No quote found for work order ${data.workOrderId}`);
+          return;
+        }
+
+        // Usar o orçamento mais recente
+        const quote = quotes[quotes.length - 1];
+
+        // Validar e aprovar o orçamento se necessário
+        if (quote.status !== 'APPROVED') {
+          await this.quoteService.approve(quote._id.toString());
+        }
+
+        // Criar o pagamento
+        const payment = await this.paymentService.create({
+          quoteId: quote._id.toString(),
+          workOrderId: data.workOrderId,
+          customerId: data.customerId,
+          amount: quote.totalAmount,
+          paymentMethod: PaymentMethod.PIX, // Default
+        });
+
+        this.logger.log(`Payment created ${payment._id} for work order ${data.workOrderId}`);
+      } catch (error) {
+        this.logger.error(
+          `Failed to create payment for work order ${data.workOrderId}:`,
+          error.message,
+        );
       }
     });
   }
