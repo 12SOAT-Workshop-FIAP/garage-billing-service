@@ -29,6 +29,7 @@
     "jsonwebtoken": "^9.0.3",
     "mercadopago": "^2.0.15",
     "mongoose": "^8.10.0",
+    "newrelic": "^13.9.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "uuid": "^11.0.4"
